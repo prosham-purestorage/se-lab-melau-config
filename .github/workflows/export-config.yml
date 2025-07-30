@@ -1,0 +1,37 @@
+name: Export Configuration
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'lab-config.yml'
+      - 'secrets.yml.encrypted'
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: Install dependencies
+      run: pip install PyYAML
+      
+    - name: Export configuration
+      run: ./scripts/export-config.sh
+      
+    - name: Commit exports
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add export/
+        if ! git diff --staged --quiet; then
+          git commit -m "Auto-export configuration [skip ci]"
+          git push
+        fi
