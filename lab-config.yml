@@ -78,7 +78,7 @@ integration:
     config: "https://github.com/prosham-purestorage/se-lab-melau-config"
     webconsole: "https://github.com/prosham-purestorage/se-lab-melau-webconsole"
     vmtemplates: "https://github.com/prosham-purestorage/se-lab-melau-vmtemplates"
-    vmtemplates: "https://github.com/prosham-purestorage/se-lab-melau-ansible"
+    ansible: "https://github.com/prosham-purestorage/se-lab-melau-ansible"
     
   shared_secrets:
     encryption_method: "aes-256-cbc"

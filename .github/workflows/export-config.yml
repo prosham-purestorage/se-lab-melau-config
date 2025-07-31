@@ -21,10 +21,16 @@ jobs:
         python-version: '3.x'
         
     - name: Install dependencies
-      run: pip install PyYAML
-      
-    - name: Export configuration
-      run: ./scripts/export-config.sh
+      run: pip install PyYAML cryptography
+
+    - name: Export configuration (.env)
+      run: python scripts/subscriber/update.py --type env --output export/lab-config.env
+
+    - name: Export configuration (.json)
+      run: python scripts/subscriber/update.py --type json --output export/lab-config.json
+
+    - name: Export configuration (PowerShell)
+      run: python scripts/subscriber/update.py --type ps1 --output export/vmware-config.ps1
       
     - name: Commit exports
       run: |
