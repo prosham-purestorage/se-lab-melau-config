@@ -1,6 +1,6 @@
 # Ignore decrypted secrets and sensitive files
 secrets.yml
-export/secrets.yml
+export/
 
 # Ignore key files
 *.key
