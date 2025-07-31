@@ -1,0 +1,17 @@
+# Ignore decrypted secrets and sensitive files
+secrets.yml
+export/secrets.yml
+
+# Ignore key files
+*.key
+.purestorage/
+
+# Ignore Python virtual environments
+.venv/
+
+# Ignore other sensitive or temp files
+*.bak
+*.tmp
+
+# Allow encrypted secrets
+!secrets.yml.encrypted
