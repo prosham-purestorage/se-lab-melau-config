@@ -13,7 +13,7 @@ help:
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  1. Add se-lab-melau-config as a git submodule:"
-	@echo "     git submodule add <repo-url> config/shared"
+	@echo "     git submodule add <repo-url> config"
 	@echo "  2. Ensure you have the decryption key at ~/.purestorage/se-lab-melau.key"
 	@echo ""
 	@echo "Usage:"
@@ -23,15 +23,15 @@ help:
 # Install dependencies and set up virtual environment
 install:
 	@echo "Setting up virtual environment and dependencies..."
-	python3 config/shared/scripts/subscriber/install.py
+	python3 config/scripts/subscriber/install.py
 
 # Generate all configuration files
 config: install
 	@echo "Generating configuration files..."
 	mkdir -p export
-	python3 config/shared/scripts/subscriber/update.py --type env --output export/lab-config.env --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
-	python3 config/shared/scripts/subscriber/update.py --type json --output export/lab-config.json --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
-	python3 config/shared/scripts/subscriber/update.py --type ps1 --output export/lab-config.ps1 --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
+	python3 config/scripts/subscriber/update.py --type env --output export/lab-config.env --config config/lab-config.yml --secrets config/secrets.yml.encrypted
+	python3 config/scripts/subscriber/update.py --type json --output export/lab-config.json --config config/lab-config.yml --secrets config/secrets.yml.encrypted
+	python3 config/scripts/subscriber/update.py --type ps1 --output export/lab-config.ps1 --config config/lab-config.yml --secrets config/secrets.yml.encrypted
 	@echo ""
 	@echo "✓ Configuration files generated in export/ directory:"
 	@echo "  - export/lab-config.env  (shell environment variables)"
@@ -49,5 +49,5 @@ clean:
 # Update submodule to latest version
 update-submodule:
 	@echo "Updating config submodule to latest version..."
-	git submodule update --remote config/shared
+	git submodule update --remote config
 	@echo "✓ Submodule updated"

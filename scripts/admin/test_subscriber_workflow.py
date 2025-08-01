@@ -17,22 +17,22 @@ def setup_test_subscriber_repo():
     subscriber_repo = temp_dir / "test-subscriber"
     subscriber_repo.mkdir()
     
-    # Create config/shared submodule structure
-    config_shared = subscriber_repo / "config" / "shared"
-    config_shared.mkdir(parents=True)
+    # Create config submodule structure (config/ not config/shared/)
+    config_submodule = subscriber_repo / "config"
+    config_submodule.mkdir(parents=True)
     
     # Copy the entire source repo to simulate submodule
     source_repo = Path(__file__).resolve().parent.parent.parent
-    shutil.copytree(source_repo, config_shared, dirs_exist_ok=True)
+    shutil.copytree(source_repo, config_submodule, dirs_exist_ok=True)
     
-    return subscriber_repo, config_shared
+    return subscriber_repo, config_submodule
 
-def test_install_script(subscriber_repo, config_shared):
+def test_install_script(subscriber_repo, config_submodule):
     """Test the install.py script in subscriber environment"""
     print("Testing install.py in subscriber environment...")
     
     os.chdir(subscriber_repo)
-    install_script = config_shared / "scripts" / "subscriber" / "install.py"
+    install_script = config_submodule / "scripts" / "subscriber" / "install.py"
     
     if not install_script.exists():
         print(f"ERROR: install.py not found at {install_script}")
@@ -58,12 +58,12 @@ def test_install_script(subscriber_repo, config_shared):
         print(f"STDERR: {e.stderr}")
         return False
 
-def test_update_script(subscriber_repo, config_shared):
+def test_update_script(subscriber_repo, config_submodule):
     """Test the update.py script in subscriber environment"""
     print("Testing update.py in subscriber environment...")
     
     os.chdir(subscriber_repo)
-    update_script = config_shared / "scripts" / "subscriber" / "update.py"
+    update_script = config_submodule / "scripts" / "subscriber" / "update.py"
     
     if not update_script.exists():
         print(f"ERROR: update.py not found at {update_script}")
@@ -89,8 +89,8 @@ def test_update_script(subscriber_repo, config_shared):
                 sys.executable, str(update_script),
                 "--type", export_type,
                 "--output", output_path,
-                "--config", str(config_shared / "lab-config.yml"),
-                "--secrets", str(config_shared / "secrets.yml.encrypted"),
+                "--config", str(config_submodule / "lab-config.yml"),
+                "--secrets", str(config_submodule / "secrets.yml.encrypted"),
                 "--key", str(Path.home() / ".purestorage/se-lab-melau.key")
             ]
             
@@ -120,12 +120,12 @@ def test_update_script(subscriber_repo, config_shared):
     
     return success
 
-def test_makefile_integration(subscriber_repo, config_shared):
+def test_makefile_integration(subscriber_repo, config_submodule):
     """Test using a Makefile from subscriber repo"""
     print("Testing Makefile integration in subscriber environment...")
     
     # Copy the actual Makefile template instead of creating a test one
-    template_makefile = config_shared / "templates" / "Makefile.subscriber"
+    template_makefile = config_submodule / "templates" / "Makefile.subscriber"
     subscriber_makefile = subscriber_repo / "Makefile"
     
     if template_makefile.exists():
@@ -139,10 +139,10 @@ def test_makefile_integration(subscriber_repo, config_shared):
 
 config:
 \tmkdir -p export
-\tpython3 config/shared/scripts/subscriber/install.py
-\tpython3 config/shared/scripts/subscriber/update.py --type env --output export/lab-config.env --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
-\tpython3 config/shared/scripts/subscriber/update.py --type json --output export/lab-config.json --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
-\tpython3 config/shared/scripts/subscriber/update.py --type ps1 --output export/lab-config.ps1 --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
+\tpython3 config/scripts/subscriber/install.py
+\tpython3 config/scripts/subscriber/update.py --type env --output export/lab-config.env --config config/lab-config.yml --secrets config/secrets.yml.encrypted
+\tpython3 config/scripts/subscriber/update.py --type json --output export/lab-config.json --config config/lab-config.yml --secrets config/secrets.yml.encrypted
+\tpython3 config/scripts/subscriber/update.py --type ps1 --output export/lab-config.ps1 --config config/lab-config.yml --secrets config/secrets.yml.encrypted
 """
         with open(subscriber_makefile, 'w') as f:
             f.write(makefile_content)
@@ -183,15 +183,15 @@ def main():
     
     # Setup test environment
     print("Setting up test subscriber repository...")
-    subscriber_repo, config_shared = setup_test_subscriber_repo()
+    subscriber_repo, config_submodule = setup_test_subscriber_repo()
     print(f"Test repo created at: {subscriber_repo}")
     
     try:
         # Run tests
         tests = [
-            ("Install Script", lambda: test_install_script(subscriber_repo, config_shared)),
-            ("Update Script", lambda: test_update_script(subscriber_repo, config_shared)),
-            ("Makefile Integration", lambda: test_makefile_integration(subscriber_repo, config_shared))
+            ("Install Script", lambda: test_install_script(subscriber_repo, config_submodule)),
+            ("Update Script", lambda: test_update_script(subscriber_repo, config_submodule)),
+            ("Makefile Integration", lambda: test_makefile_integration(subscriber_repo, config_submodule))
         ]
         
         results = []
