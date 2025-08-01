@@ -124,8 +124,17 @@ def test_makefile_integration(subscriber_repo, config_shared):
     """Test using a Makefile from subscriber repo"""
     print("Testing Makefile integration in subscriber environment...")
     
-    # Create a test Makefile in subscriber repo (without git commands for testing)
-    makefile_content = """# Test Makefile for subscriber repo
+    # Copy the actual Makefile template instead of creating a test one
+    template_makefile = config_shared / "templates" / "Makefile.subscriber"
+    subscriber_makefile = subscriber_repo / "Makefile"
+    
+    if template_makefile.exists():
+        import shutil
+        shutil.copy2(template_makefile, subscriber_makefile)
+        print("✓ Copied Makefile template to subscriber repo")
+    else:
+        # Fallback to creating test Makefile if template doesn't exist
+        makefile_content = """# Test Makefile for subscriber repo
 .PHONY: config
 
 config:
@@ -135,10 +144,9 @@ config:
 \tpython3 config/shared/scripts/subscriber/update.py --type json --output export/lab-config.json --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
 \tpython3 config/shared/scripts/subscriber/update.py --type ps1 --output export/lab-config.ps1 --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
 """
-    
-    makefile_path = subscriber_repo / "Makefile"
-    with open(makefile_path, 'w') as f:
-        f.write(makefile_content)
+        with open(subscriber_makefile, 'w') as f:
+            f.write(makefile_content)
+        print("✓ Created fallback test Makefile")
     
     os.chdir(subscriber_repo)
     

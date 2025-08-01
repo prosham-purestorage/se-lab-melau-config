@@ -1,0 +1,52 @@
+# Makefile for Subscriber Repository
+# Copy this file to your repository root as 'Makefile' after adding se-lab-melau-config as a submodule
+
+.PHONY: config install clean help
+
+# Default target - show help
+help:
+	@echo "Available targets:"
+	@echo "  install  - Set up dependencies and virtual environment"
+	@echo "  config   - Generate all configuration files (env, json, ps1)"
+	@echo "  clean    - Remove generated configuration files"
+	@echo ""
+	@echo "Prerequisites:"
+	@echo "  1. Add se-lab-melau-config as a git submodule:"
+	@echo "     git submodule add <repo-url> config/shared"
+	@echo "  2. Ensure you have the decryption key at ~/.purestorage/se-lab-melau.key"
+	@echo ""
+	@echo "Usage:"
+	@echo "  make install  # Run once to set up environment"
+	@echo "  make config   # Generate config files"
+
+# Install dependencies and set up virtual environment
+install:
+	@echo "Setting up virtual environment and dependencies..."
+	python3 config/shared/scripts/subscriber/install.py
+
+# Generate all configuration files
+config: install
+	@echo "Generating configuration files..."
+	mkdir -p export
+	python3 config/shared/scripts/subscriber/update.py --type env --output export/lab-config.env --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
+	python3 config/shared/scripts/subscriber/update.py --type json --output export/lab-config.json --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
+	python3 config/shared/scripts/subscriber/update.py --type ps1 --output export/lab-config.ps1 --config config/shared/lab-config.yml --secrets config/shared/secrets.yml.encrypted
+	@echo ""
+	@echo "✓ Configuration files generated in export/ directory:"
+	@echo "  - export/lab-config.env  (shell environment variables)"
+	@echo "  - export/lab-config.json (JSON format)"
+	@echo "  - export/lab-config.ps1  (PowerShell variables)"
+	@echo ""
+	@echo "All files have secure permissions (mode 400 - read-only for owner)"
+
+# Clean generated configuration files
+clean:
+	@echo "Cleaning generated configuration files..."
+	rm -f export/lab-config.env export/lab-config.json export/lab-config.ps1
+	@echo "✓ Configuration files removed"
+
+# Update submodule to latest version
+update-submodule:
+	@echo "Updating config submodule to latest version..."
+	git submodule update --remote config/shared
+	@echo "✓ Submodule updated"
