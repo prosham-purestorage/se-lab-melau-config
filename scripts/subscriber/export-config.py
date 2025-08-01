@@ -11,11 +11,17 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
 def load_key(key_path):
+    key_path = Path(key_path)
+    if not key_path.is_absolute():
+        key_path = Path(__file__).parent / key_path
     with open(key_path, 'r') as f:
         key_b64 = f.read().strip()
     return base64.b64decode(key_b64)
 
 def decrypt_secrets(enc_path, key_path):
+    enc_path = Path(enc_path)
+    if not enc_path.is_absolute():
+        enc_path = Path(__file__).parent / enc_path
     with open(enc_path, 'rb') as f:
         iv = f.read(16)
         ciphertext = f.read()
@@ -28,6 +34,9 @@ def decrypt_secrets(enc_path, key_path):
     return yaml.safe_load(plaintext)
 
 def load_config(config_path):
+    config_path = Path(config_path)
+    if not config_path.is_absolute():
+        config_path = Path(__file__).parent / config_path
     with open(config_path, 'r') as f:
         return yaml.safe_load(f)
 
