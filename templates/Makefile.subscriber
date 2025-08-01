@@ -1,14 +1,15 @@
 # Makefile for Subscriber Repository
 # Copy this file to your repository root as 'Makefile' after adding se-lab-melau-config as a submodule
 
-.PHONY: config install clean help
+.PHONY: config install clean help update-submodule
 
 # Default target - show help
 help:
 	@echo "Available targets:"
-	@echo "  install  - Set up dependencies and virtual environment"
-	@echo "  config   - Generate all configuration files (env, json, ps1)"
-	@echo "  clean    - Remove generated configuration files"
+	@echo "  install         - Set up dependencies and virtual environment"
+	@echo "  config          - Generate all configuration files (env, json, ps1)"
+	@echo "  clean           - Remove generated configuration files"
+	@echo "  update-submodule - Update config submodule to latest version"
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  1. Add se-lab-melau-config as a git submodule:"
