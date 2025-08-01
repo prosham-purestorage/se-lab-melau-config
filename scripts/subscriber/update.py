@@ -5,7 +5,8 @@ import argparse
 import subprocess
 from pathlib import Path
 
-VENV_DIR = Path('.venv')
+REPO_ROOT = Path(__file__).resolve().parents[3] if len(Path(__file__).resolve().parents) > 2 else Path.cwd()
+VENV_DIR = REPO_ROOT / '.venv'
 EXPORT_SCRIPT = Path(__file__).parent / 'export-config.py'
 
 def run_in_venv(args):

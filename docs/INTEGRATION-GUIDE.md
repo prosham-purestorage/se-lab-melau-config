@@ -38,13 +38,13 @@ Commit and push your changes to the repository.
 ### 1. Add Submodule
 
 ```sh
-git submodule add https://github.com/prosham-purestorage/se-lab-melau-config.git config/shared
+git submodule add https://github.com/prosham-purestorage/se-lab-melau-config.git config
 ```
 
 ### 2. Install Python Environment
 
 ```sh
-python config/shared/scripts/subscriber/install.py
+python config/scripts/subscriber/install.py
 ```
 
 ### 3. Generate Config Files
@@ -54,22 +54,22 @@ Generate the required config files for your project:
 #### For se-lab-melau-webconsole (shell/Ansible)
 
 ```sh
-python config/shared/scripts/subscriber/update.py --type env --output config/shared/export/lab-config.env
-source config/shared/export/lab-config.env
+python config/scripts/subscriber/update.py --type env --output config/export/lab-config.env
+source config/export/lab-config.env
 ```
 
 #### For se-lab-melau-vmtemplates (PowerShell)
 
 ```powershell
-python config/shared/scripts/subscriber/update.py --type ps1 --output config/shared/export/vmware-config.ps1
-. ./config/shared/export/vmware-config.ps1
+python config/scripts/subscriber/update.py --type ps1 --output config/export/vmware-config.ps1
+. ./config/export/vmware-config.ps1
 ```
 
 #### For JSON-based consumers
 
 ```sh
-python config/shared/scripts/subscriber/update.py --type json --output config/shared/export/lab-config.json
-# Use config/shared/export/lab-config.json in your app
+python config/scripts/subscriber/update.py --type json --output config/export/lab-config.json
+# Use config/export/lab-config.json in your app
 ```
 
 ## Available Exports
