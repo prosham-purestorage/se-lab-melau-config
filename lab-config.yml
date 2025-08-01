@@ -40,7 +40,7 @@ services:
     repository: "prosham-purestorage/se-lab-melau-webconsole"
     
   rds:
-    server_ip: "10.112.0.11"
+    server_ip: "10.112.0.10"
     gateway_host: "pstg-mgmt-rds.mel.aulab.purestorage.com"
     web_access_url: "https://pstg-mgmt-rds.mel.aulab.purestorage.com/rdweb"
     farm_name: "Pure-SE-Lab-RDS"
@@ -88,7 +88,7 @@ integration:
 pure_storage:
   arrays:
     primary:
-      management_vip: "10.112.0.100"
+      management_vip: "10.112.0.5"
       username: "pureuser"
 
 security:
