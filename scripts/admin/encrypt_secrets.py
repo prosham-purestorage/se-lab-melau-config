@@ -37,6 +37,10 @@ def encrypt_file():
         f.write(iv)
         f.write(ciphertext)
     print(f"Encrypted secrets to {ENCRYPTED_FILE}")
+    
+    # Remove the unencrypted file for security
+    os.remove(DECRYPTED_FILE)
+    print(f"Removed unencrypted {DECRYPTED_FILE} for security")
 
 
 def main():

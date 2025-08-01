@@ -5,7 +5,15 @@ import argparse
 import subprocess
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3] if len(Path(__file__).resolve().parents) > 2 else Path.cwd()
+def find_repo_root():
+    cur = Path(__file__).resolve().parent
+    while cur != cur.parent:
+        if (cur / '.venv').exists():
+            return cur
+        cur = cur.parent
+    return Path.cwd()
+
+REPO_ROOT = find_repo_root()
 VENV_DIR = REPO_ROOT / '.venv'
 EXPORT_SCRIPT = Path(__file__).parent / 'export-config.py'
 
