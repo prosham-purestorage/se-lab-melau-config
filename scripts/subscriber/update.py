@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 
 VENV_DIR = Path('.venv')
-EXPORT_SCRIPT = Path('scripts/export-config.py')
+EXPORT_SCRIPT = Path(__file__).parent / 'export-config.py'
 
 def run_in_venv(args):
     python_path = VENV_DIR / 'bin' / 'python'
