@@ -32,19 +32,19 @@ infrastructure:
     # Domain Group Access Configuration
     # These groups control who can authenticate to Ubuntu templates
     allowed_groups:
-      - "Domain Admins"
-      - "Domain Users"
+      - "PureSEs"
+      - "PureGuests"
     
     # Groups that get administrative privileges (sudo access)
     admin_groups:
-      - "Domain Admins"
-    
+      - "Pure SEs"
+
     # Groups allowed for SSH access
     ssh_allowed_groups:
       - "ubuntu"      # Local ubuntu user
       - "sudo"        # Local sudo group
-      - "Domain Admins"
-      - "Domain Users"
+      - "Pure SEs"
+      - "Pure Guests"
 
 # This will generate the following environment variables:
 # INFRASTRUCTURE_DOMAIN_ALLOWED_GROUPS=Domain Admins,Domain Users
