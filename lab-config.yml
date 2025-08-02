@@ -15,7 +15,7 @@ infrastructure:
     server: "pstg-mgmt-vcsa1.mel.aulab.purestorage.com"
     datacenter: "Melbourne-SE-Lab"
     cluster: "567CollinsSt"
-    datastore: "Pure-Mgmt-Local-SSD1"
+    datastore: "pstg-vmfs-01"
     network: "MgmtDPG"
     template_folder: "Templates"
     content_library: "mel-au-lab"
