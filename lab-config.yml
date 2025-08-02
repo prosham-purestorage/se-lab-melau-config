@@ -82,6 +82,29 @@ infrastructure:
     dns_servers:
       - "10.112.0.9"
     ntp_server: "10.98.0.2,10.98.0.3"
+
+# Certificate Authority Configuration
+certificates:
+  ca_bundle:
+    path: "certificates/ca_bundle.cer"
+    description: "Combined CA certificate bundle for all lab services"
+    
+  pure_storage_ca:
+    path: "certificates/keyfactor-purestorage.cer"
+    description: "Pure Storage Keyfactor PKI Infrastructure Certificate"
+    issuer: "PURE_STORAGE-RCA"
+    valid_until: "2032-01-11"
+    
+  lab_ad_ca:
+    path: "certificates/mel-au-ad-certsrv.cer"
+    description: "Melbourne Lab Active Directory Certificate Services CA"
+    issuer: "mel-PSTG-MGMT-AD1-CA-1"
+    valid_until: "2033-07-31"
+    
+  installation:
+    ubuntu_command: "sudo cp certificates/*.cer /usr/local/share/ca-certificates/ && sudo update-ca-certificates"
+    centos_command: "sudo cp certificates/*.cer /etc/pki/ca-trust/source/anchors/ && sudo update-ca-trust"
+    windows_command: "Import-Certificate -FilePath certificates\\*.cer -CertStoreLocation Cert:\\LocalMachine\\Root"
     
 services:
   web_console:

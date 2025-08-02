@@ -7,6 +7,7 @@ Automated configuration and secrets management system for SE Lab Melbourne infra
 - **Secure Configuration Management**: AES-256-CBC encrypted secrets with automatic cleanup
 - **Multi-Format Export**: Generate configuration in env, json, and ps1 formats
 - **Cross-Repository Support**: Works as standalone repo or git submodule
+- **CA Certificate Management**: Integrated Pure Storage and Melbourne Lab CA certificates
 - **Automated Testing**: Comprehensive test suite including subscriber workflow simulation
 - **File Security**: All exports use mode 400 permissions (read-only for owner)
 
@@ -15,6 +16,11 @@ Automated configuration and secrets management system for SE Lab Melbourne infra
 ```
 ├── lab-config.yml              # Main configuration file
 ├── secrets.yml.encrypted       # Encrypted secrets (AES-256-CBC)
+├── certificates/               # CA certificates for lab infrastructure
+│   ├── ca_bundle.cer          # Combined CA certificate bundle
+│   ├── keyfactor-purestorage.cer # Pure Storage PKI CA
+│   ├── mel-au-ad-certsrv.cer  # Melbourne Lab AD Certificate Services CA
+│   └── README.md              # Certificate documentation
 ├── scripts/
 │   ├── admin/                  # Admin tools for repo maintainers
 │   │   ├── encrypt_secrets.py  # Encrypt secrets with auto-cleanup
