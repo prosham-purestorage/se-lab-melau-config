@@ -120,11 +120,24 @@ Timestamp: {date-time}
 
 ## Admin Review Process
 
-1. Admins receive PR notifications
-2. Review the proposed changes
-3. Test if needed
-4. Merge or request modifications
-5. Subscribers get changes via `make update`
+1. Check for incoming changes: `make review-changes`
+2. Accept subscriber changes: `make accept-changes`
+3. Or manually review and merge specific PRs
+
+The `make accept-changes` command will:
+
+- Fetch latest changes from subscribers
+- Pull and merge approved changes
+- Regenerate all export files
+- Run validation tests
+- Display updated status
+
+For more granular control, admins can:
+
+1. Review individual PRs on GitHub
+2. Test changes in a separate branch
+3. Merge or request modifications
+4. Use `make accept-changes` after manual merges
 
 ## Security Considerations
 
@@ -155,6 +168,8 @@ Timestamp: {date-time}
 | `make propose-changes` | Create PR with your changes |
 | `make update` | Get latest approved changes |
 | `make update-submodule` | Force update config (discards local changes) |
+| `make review-changes` | **Admin**: Review incoming subscriber changes |
+| `make accept-changes` | **Admin**: Accept and integrate subscriber changes |
 
 ## Integration with Existing Workflow
 
