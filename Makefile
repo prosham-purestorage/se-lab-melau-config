@@ -1,6 +1,6 @@
 # Makefile for SE Lab Melbourne Config Repo
 
-.PHONY: tests test-decrypt test-export test-subscriber clean export commit push status help test-pr
+.PHONY: tests test-decrypt test-export test-subscriber clean export commit push status help test-pr review-changes accept-changes
 
 # Default target - show help
 help:
@@ -15,10 +15,16 @@ help:
 	@echo "  status          - Show git status and recent commits"
 	@echo "  commit          - Export configs, add all changes, and commit"
 	@echo "  push            - Commit and push changes to GitHub"
+	@echo "  review-changes  - Review incoming subscriber changes (fetch + show diffs)"
+	@echo "  accept-changes  - Accept and integrate subscriber changes (pull + export + test)"
 	@echo ""
 	@echo "Git Workflow:"
 	@echo "  make commit     # Export + add + commit with message prompt"
 	@echo "  make push       # Full workflow: export + commit + push"
+	@echo ""
+	@echo "Subscriber Change Review:"
+	@echo "  make review-changes  # See what changes are available from subscribers"
+	@echo "  make accept-changes  # Accept subscriber changes and regenerate exports"
 
 # Run all tests
 tests: test-decrypt test-export test-subscriber test-pr
@@ -73,3 +79,43 @@ push: commit
 	@echo "🚀 Pushing to GitHub..."
 	git push origin main
 	@echo "✅ Changes pushed to GitHub successfully"
+
+# Review incoming subscriber changes (admin workflow)
+review-changes:
+	@echo "🔍 Reviewing Subscriber Changes"
+	@echo "================================"
+	@echo "📡 Fetching latest changes from remote..."
+	git fetch origin
+	@echo ""
+	@if [ "$(shell git log main..origin/main --oneline | wc -l)" -eq 0 ]; then \
+		echo "✅ No new changes from subscribers"; \
+	else \
+		echo "📋 New commits from subscribers:"; \
+		git log main..origin/main --oneline; \
+		echo ""; \
+		echo "📊 Detailed changes:"; \
+		git diff main origin/main; \
+		echo ""; \
+		echo "💡 To accept these changes: make accept-changes"; \
+	fi
+
+# Accept and integrate subscriber changes (admin workflow)
+accept-changes:
+	@echo "✅ Accepting Subscriber Changes"
+	@echo "==============================="
+	@echo "📡 Fetching latest changes..."
+	git fetch origin
+	@if [ "$(shell git log main..origin/main --oneline | wc -l)" -eq 0 ]; then \
+		echo "ℹ️  No new changes to accept"; \
+	else \
+		echo "📥 Pulling subscriber changes..."; \
+		git pull origin main; \
+		echo "🔄 Regenerating export files..."; \
+		$(MAKE) export; \
+		echo "🧪 Running validation tests..."; \
+		$(MAKE) test-export; \
+		echo ""; \
+		echo "✅ Subscriber changes accepted and integrated!"; \
+		echo "📊 Updated configuration status:"; \
+		$(MAKE) status; \
+	fi
