@@ -18,7 +18,7 @@ infrastructure:
     datastore: "Pure-Mgmt-Local-SSD1"
     network: "MgmtDPG"
     template_folder: "Templates"
-    content-library: "mel-au-lab"
+    content_library: "mel-au-lab"
 
 # Domain Configuration Update for lab-config.yml
 # Add this to the infrastructure.domain section
