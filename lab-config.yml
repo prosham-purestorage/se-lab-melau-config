@@ -114,9 +114,6 @@ vm_templates:
       content_library: "mel-au-lab"   # Content Library for OVA templates
       ubuntu_base_ova: "ubuntu-2204-base.ova"
       windows_base_ova: "windows-srv-2025-base.ova"
-      # Legacy VM template names (for migration)
-      single_homed_template_name: "ubuntu-24-04-single-net-template"
-      dual_homed_template_name: "ubuntu-24-04-dual-net-template"
     
     # Network Configuration Options
     network_configurations:
