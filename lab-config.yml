@@ -17,7 +17,7 @@ infrastructure:
     cluster: "567CollinsSt"
     datastore: "pstg-vmfs-01"
     network: "MgmtDPG"
-    template_folder: "Templates"
+    template_folder: "pstg-template"
     content_library: "mel-au-lab"
 
 # Domain Configuration Update for lab-config.yml
@@ -37,14 +37,14 @@ infrastructure:
     
     # Groups that get administrative privileges (sudo access)
     admin_groups:
-      - "Pure SEs"
+      - "PureSEs"
 
     # Groups allowed for SSH access
     ssh_allowed_groups:
       - "ubuntu"      # Local ubuntu user
       - "sudo"        # Local sudo group
-      - "Pure SEs"
-      - "Pure Guests"
+      - "PureSEs"
+      - "PureGuests"
 
 # This will generate the following environment variables:
 # INFRASTRUCTURE_DOMAIN_ALLOWED_GROUPS=Domain Admins,Domain Users
@@ -87,13 +87,13 @@ services:
   web_console:
     port: 3000
     ssl_enabled: true
-    admin_vm_ip: "10.112.0.11"
-    admin_vm_hostname: "pstg-mgmt-admin"
+    admin_vm_ip: "10.112.0.10"
+    admin_vm_hostname: "pstg-mgmt-webconsole"
     repository: "prosham-purestorage/se-lab-melau-webconsole"
     
   rds:
-    server_ip: "10.112.0.10"
-    gateway_host: "pstg-mgmt-rds.mel.aulab.purestorage.com"
+    server_ip: "10.211.0.10"
+    gateway_host: "pstg-mgmt-winrds.mel.aulab.purestorage.com"
     web_access_url: "https://pstg-mgmt-rds.mel.aulab.purestorage.com/rdweb"
     farm_name: "Pure-SE-Lab-RDS"
 
@@ -114,15 +114,12 @@ vm_templates:
       content_library: "mel-au-lab"   # Content Library for OVA templates
       ubuntu_base_ova: "ubuntu-2204-base.ova"
       windows_base_ova: "windows-srv-2025-base.ova"
-      # Legacy VM template names (for migration)
-      single_homed_template_name: "ubuntu-24-04-single-net-template"
-      dual_homed_template_name: "ubuntu-24-04-dual-net-template"
     
     # Network Configuration Options
     network_configurations:
       single_homed:
         name_suffix: "single-net"
-        primary_network: "VMnetDPG"
+        primary_network: "MgmtPG"
         description: "Single network adapter for management traffic only"
         use_cases: ["development", "testing", "simple deployments"]
         
@@ -134,8 +131,8 @@ vm_templates:
           
       dual_homed:
         name_suffix: "dual-net"
-        primary_network: "VMnetDPG"      # Management network
-        secondary_network: "StorageDPG"   # Storage network  
+        primary_network: "VMnetPG"      # Management network
+        secondary_network: "StoragePG"   # Storage network  
         description: "Dual network adapters for management and storage separation"
         use_cases: ["production", "storage systems", "performance testing"]
         
