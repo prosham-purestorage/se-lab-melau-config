@@ -1,0 +1,58 @@
+# template-pipeline-status.ps1
+# PowerShell script to show VM template creation pipeline status
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "🏭 VM Template Creation Pipeline Status (PowerShell)" -ForegroundColor Cyan
+Write-Host "=====================================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Load the PowerShell configuration
+$configPath = Join-Path $PSScriptRoot "..\export\lab-config.ps1"
+if (Test-Path $configPath) {
+    . $configPath
+    Write-Host "✅ Configuration loaded from $configPath" -ForegroundColor Green
+} else {
+    Write-Host "❌ Error: Configuration not found at $configPath" -ForegroundColor Red
+    Write-Host "   Run 'make export' first to generate configuration files." -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host ""
+Write-Host "📍 Infrastructure:" -ForegroundColor Yellow
+Write-Host "   vCenter Folder: $VM_TEMPLATE_PIPELINE_INFRASTRUCTURE_VCENTER_FOLDER"
+Write-Host "   Content Library: $VM_TEMPLATE_PIPELINE_INFRASTRUCTURE_CONTENT_LIBRARY"
+Write-Host "   Repository: $VM_TEMPLATE_PIPELINE_INFRASTRUCTURE_REPOSITORY"
+Write-Host ""
+
+Write-Host "🖥️  Candidate VMs:" -ForegroundColor Yellow
+Write-Host "   Ubuntu 22.04: $VM_TEMPLATE_PIPELINE_CANDIDATE_VMS_UBUNTU_2204_CANDIDATE_VM_NAME ($VM_TEMPLATE_PIPELINE_CANDIDATE_VMS_UBUNTU_2204_CANDIDATE_STATUS)"
+Write-Host "   Ubuntu 24.04: $VM_TEMPLATE_PIPELINE_CANDIDATE_VMS_UBUNTU_2404_CANDIDATE_VM_NAME ($VM_TEMPLATE_PIPELINE_CANDIDATE_VMS_UBUNTU_2404_CANDIDATE_STATUS)"
+Write-Host "   Windows 2022: $VM_TEMPLATE_PIPELINE_CANDIDATE_VMS_WINDOWS_2022_CANDIDATE_VM_NAME ($VM_TEMPLATE_PIPELINE_CANDIDATE_VMS_WINDOWS_2022_CANDIDATE_STATUS)"
+Write-Host ""
+
+Write-Host "📋 Source Templates:" -ForegroundColor Yellow
+Write-Host "   Ubuntu 22.04 Single: $VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_UBUNTU_2204_SINGLE_HOMED_TEMPLATE_NAME ($VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_UBUNTU_2204_SINGLE_HOMED_STATUS)"
+Write-Host "   Ubuntu 22.04 Dual:   $VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_UBUNTU_2204_DUAL_HOMED_TEMPLATE_NAME ($VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_UBUNTU_2204_DUAL_HOMED_STATUS)"
+Write-Host "   Ubuntu 24.04 Single: $VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_UBUNTU_2404_SINGLE_HOMED_TEMPLATE_NAME ($VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_UBUNTU_2404_SINGLE_HOMED_STATUS)"
+Write-Host "   Windows 2022 Single: $VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_WINDOWS_2022_SINGLE_HOMED_TEMPLATE_NAME ($VM_TEMPLATE_PIPELINE_SOURCE_TEMPLATES_WINDOWS_2022_SINGLE_HOMED_STATUS)"
+Write-Host ""
+
+Write-Host "📦 Content Library OVAs:" -ForegroundColor Yellow
+Write-Host "   $VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_BASE_OVA_NAME ($VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_BASE_STATUS) v$VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_BASE_VERSION"
+Write-Host "   $VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_DUAL_OVA_NAME ($VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_DUAL_STATUS) v$VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_DUAL_VERSION"
+Write-Host "   $VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2404_BASE_OVA_NAME ($VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2404_BASE_STATUS) v$VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2404_BASE_VERSION"
+Write-Host "   $VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_WINDOWS_2022_BASE_OVA_NAME ($VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_WINDOWS_2022_BASE_STATUS) v$VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_WINDOWS_2022_BASE_VERSION"
+Write-Host ""
+
+Write-Host "💡 Example Usage in PowerShell Scripts:" -ForegroundColor Green
+Write-Host @"
+   # Deploy a VM from the pipeline
+   `$ovaPath = "`$VM_TEMPLATE_PIPELINE_INFRASTRUCTURE_CONTENT_LIBRARY/`$VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_BASE_OVA_NAME"
+   New-VM -Name "my-new-vm" -Template `$ovaPath
+   
+   # Check if a template is ready
+   if (`$VM_TEMPLATE_PIPELINE_CONTENT_LIBRARY_OVAS_UBUNTU_2204_BASE_STATUS -eq "active") {
+       Write-Host "Ubuntu 22.04 template is ready for deployment"
+   }
+"@

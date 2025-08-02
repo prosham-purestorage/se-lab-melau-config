@@ -120,6 +120,192 @@ services:
     web_access_url: "https://pstg-mgmt-rds.mel.aulab.purestorage.com/rdweb"
     farm_name: "Pure-SE-Lab-RDS"
 
+# VM Template Creation Pipeline
+# Tracks the full lifecycle: Candidate VMs → Source Templates → Content Library OVAs
+vm_template_pipeline:
+  
+  # Infrastructure Configuration
+  infrastructure:
+    vcenter_folder: "pstg-template"           # vCenter folder for source templates
+    content_library: "mel-au-lab"            # Content library for final OVAs
+    repository: "prosham-purestorage/se-lab-melau-vmtemplates"
+    
+  # Template Creation Workflow
+  # 1. Candidate VMs: Running VMs used for installation and customization
+  # 2. Source Templates: Cleaned up VMs ready for templating (in vCenter folder)
+  # 3. Content Library OVAs: Final packaged templates for deployment
+  
+  candidate_vms:
+    # Ubuntu Candidates - Running VMs for installation/customization
+    ubuntu_2204_candidate:
+      vm_name: "pstg-ubuntu-2204-candidate"
+      base_iso: "ubuntu-22.04.4-live-server-amd64.iso"
+      cpu_cores: 2
+      memory_gb: 4
+      disk_gb: 20
+      network: "MgmtDPG"
+      status: "active"                        # active, building, completed
+      install_scripts:
+        - "ubuntu-base-install.sh"
+        - "ubuntu-domain-join.sh"
+        - "ubuntu-security-hardening.sh"
+        - "ubuntu-monitoring-setup.sh"
+      customization_scripts:
+        - "install-docker.sh"
+        - "install-ansible.sh"
+        - "configure-ssh-keys.sh"
+        - "install-pure-tools.sh"
+      
+    ubuntu_2404_candidate:
+      vm_name: "pstg-ubuntu-2404-candidate"
+      base_iso: "ubuntu-24.04.1-live-server-amd64.iso"
+      cpu_cores: 2
+      memory_gb: 4
+      disk_gb: 20
+      network: "MgmtDPG"
+      status: "planned"
+      install_scripts:
+        - "ubuntu-base-install.sh"
+        - "ubuntu-domain-join.sh"
+        - "ubuntu-security-hardening.sh"
+        - "ubuntu-monitoring-setup.sh"
+      customization_scripts:
+        - "install-docker.sh"
+        - "install-ansible.sh"
+        - "configure-ssh-keys.sh"
+        - "install-pure-tools.sh"
+    
+    # Windows Candidates
+    windows_2022_candidate:
+      vm_name: "pstg-windows-2022-candidate"
+      base_iso: "windows-server-2022-datacenter.iso"
+      cpu_cores: 4
+      memory_gb: 8
+      disk_gb: 60
+      network: "MgmtDPG"
+      status: "planned"
+      install_scripts:
+        - "windows-base-install.ps1"
+        - "windows-domain-join.ps1"
+        - "windows-security-config.ps1"
+      customization_scripts:
+        - "install-chocolatey.ps1"
+        - "install-powershell-modules.ps1"
+        - "configure-winrm.ps1"
+        - "install-pure-tools.ps1"
+  
+  source_templates:
+    # Source Templates in vCenter folder - cleaned and ready for OVA export
+    ubuntu_2204_single_homed:
+      template_name: "ubuntu-2204-single-net-template"
+      source_candidate: "ubuntu_2204_candidate"
+      network_type: "single_homed"
+      network_config:
+        primary_adapter: "vmxnet3"
+        primary_network: "MgmtDPG"
+        dhcp_enabled: true
+        static_capable: true
+      preparation_steps:
+        - "cleanup-logs"
+        - "reset-network-config"
+        - "clear-ssh-keys"
+        - "sysprep-linux"
+      status: "ready"                         # building, ready, exported
+      
+    ubuntu_2204_dual_homed:
+      template_name: "ubuntu-2204-dual-net-template"
+      source_candidate: "ubuntu_2204_candidate"
+      network_type: "dual_homed"
+      network_config:
+        primary_adapter: "vmxnet3"
+        secondary_adapter: "vmxnet3"
+        management_network: "MgmtDPG"
+        storage_network: "StorageDPG"
+        dhcp_enabled: true
+        static_capable: true
+      preparation_steps:
+        - "cleanup-logs"
+        - "configure-dual-network"
+        - "reset-network-config"
+        - "clear-ssh-keys"
+        - "sysprep-linux"
+      status: "building"
+      
+    ubuntu_2404_single_homed:
+      template_name: "ubuntu-2404-single-net-template"
+      source_candidate: "ubuntu_2404_candidate"
+      network_type: "single_homed"
+      network_config:
+        primary_adapter: "vmxnet3"
+        primary_network: "MgmtDPG"
+        dhcp_enabled: true
+        static_capable: true
+      preparation_steps:
+        - "cleanup-logs"
+        - "reset-network-config"
+        - "clear-ssh-keys"
+        - "sysprep-linux"
+      status: "planned"
+      
+    windows_2022_single_homed:
+      template_name: "windows-2022-single-net-template"
+      source_candidate: "windows_2022_candidate"
+      network_type: "single_homed"
+      network_config:
+        primary_adapter: "vmxnet3"
+        primary_network: "MgmtDPG"
+        dhcp_enabled: true
+        static_capable: true
+      preparation_steps:
+        - "cleanup-temp-files"
+        - "reset-network-config"
+        - "clear-event-logs"
+        - "sysprep-windows"
+      status: "planned"
+  
+  content_library_ovas:
+    # Final OVAs in Content Library - ready for deployment
+    ubuntu_2204_base:
+      ova_name: "ubuntu-2204-base.ova"
+      source_template: "ubuntu_2204_single_homed"
+      description: "Ubuntu 22.04 LTS base template with Pure Storage tools"
+      version: "1.0.0"
+      last_updated: "2025-08-03"
+      network_support: ["single_homed"]
+      use_cases: ["development", "testing", "general workloads"]
+      status: "active"                        # active, deprecated, archived
+      
+    ubuntu_2204_dual:
+      ova_name: "ubuntu-2204-dual.ova"
+      source_template: "ubuntu_2204_dual_homed"
+      description: "Ubuntu 22.04 LTS dual-homed template for storage workloads"
+      version: "1.0.0"
+      last_updated: "2025-08-03"
+      network_support: ["dual_homed"]
+      use_cases: ["production", "storage systems", "performance testing"]
+      status: "building"
+      
+    ubuntu_2404_base:
+      ova_name: "ubuntu-2404-base.ova"
+      source_template: "ubuntu_2404_single_homed"
+      description: "Ubuntu 24.04 LTS base template with Pure Storage tools"
+      version: "1.0.0"
+      last_updated: "2025-08-03"
+      network_support: ["single_homed"]
+      use_cases: ["development", "testing", "latest features"]
+      status: "planned"
+      
+    windows_2022_base:
+      ova_name: "windows-2022-base.ova"
+      source_template: "windows_2022_single_homed"
+      description: "Windows Server 2022 base template with Pure Storage tools"
+      version: "1.0.0"
+      last_updated: "2025-08-03"
+      network_support: ["single_homed"]
+      use_cases: ["windows workloads", "active directory", "file services"]
+      status: "planned"
+
+# Legacy VM Templates (maintained for backward compatibility)
 vm_templates:
   ubuntu:
     template_name: "pr-ubuntu-template"
@@ -129,14 +315,6 @@ vm_templates:
     disk_gb: 20
     network: "VM Network"
     repository: "prosham-purestorage/se-lab-melau-vmtemplates"
-    
-    # Template Creation Configuration
-    template_creation:
-      source_vm: "pstg-mgmt-ubuntu-templ"
-      source_folder: "pstg-template"  # Folder containing source VMs
-      content_library: "mel-au-lab"   # Content Library for OVA templates
-      ubuntu_base_ova: "ubuntu-2204-base.ova"
-      windows_base_ova: "windows-srv-2025-base.ova"
     
     # Network Configuration Options
     network_configurations:

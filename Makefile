@@ -1,6 +1,6 @@
 # Makefile for SE Lab Melbourne Config Repo
 
-.PHONY: tests test-decrypt test-export test-subscriber clean export commit push status help test-pr review-changes accept-changes verify-certs
+.PHONY: tests test-decrypt test-export test-subscriber clean export commit push status help test-pr review-changes accept-changes verify-certs template-status
 
 # Default target - show help
 help:
@@ -12,6 +12,7 @@ help:
 	@echo "  test-pr         - Test Pull Request workflow for config changes"
 	@echo "  export          - Generate all configuration files"
 	@echo "  verify-certs    - Verify CA certificates and show installation status"
+	@echo "  template-status - Show VM template creation pipeline status"
 	@echo "  clean           - Remove generated export files"
 	@echo "  status          - Show git status and recent commits"
 	@echo "  commit          - Export configs, add all changes, and commit"
@@ -125,3 +126,8 @@ accept-changes:
 verify-certs:
 	@echo "🔐 Verifying SE Lab Melbourne CA certificates..."
 	@./scripts/verify-certificates.sh
+
+# Show VM template creation pipeline status
+template-status:
+	@echo "🏭 Showing VM template creation pipeline status..."
+	@./scripts/template-pipeline-status.sh
