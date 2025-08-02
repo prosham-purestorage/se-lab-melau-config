@@ -1,7 +1,7 @@
 # Makefile for Subscriber Repository
 # Copy this file to your repository root as 'Makefile' after adding se-lab-melau-config as a submodule
 
-.PHONY: config install clean help update-submodule update force-update propose-changes check-changes
+.PHONY: config install clean help update-submodule update force-update propose-changes check-changes push
 
 # Default target - show help
 help:
@@ -12,6 +12,7 @@ help:
 	@echo "  clean           - Remove generated configuration files"
 	@echo "  update-submodule - Update config submodule (DISCARDS local changes)"
 	@echo "  force-update    - Alias for update-submodule"
+	@echo "  push            - Push parent repo changes (fixes submodule issues)"
 	@echo ""
 	@echo "Configuration Change Workflow:"
 	@echo "  check-changes   - Show what config changes you've made locally"
@@ -44,6 +45,9 @@ help:
 	@echo "  3. make propose-changes  # Create a Pull Request"
 	@echo "  4. Wait for admin approval and merge"
 	@echo "  5. make update           # Get approved changes back"
+	@echo ""
+	@echo "⚠️  IMPORTANT: 'make push' only pushes the PARENT repository!"
+	@echo "   Config changes must be proposed via 'make propose-changes'"
 	@echo ""
 	@echo "Note: Never edit files in config/ unless proposing changes!"
 
@@ -83,6 +87,15 @@ update-submodule:
 	@cd config && git reset --hard HEAD && git clean -fd
 	@git submodule update --remote config
 	@echo "✓ Submodule updated to latest authoritative version"
+	@echo ""
+	@echo "🔄 Committing submodule update to parent repository..."
+	@git add config
+	@if ! git diff --cached --quiet; then \
+		git commit -m "Update config submodule to latest version"; \
+		echo "✓ Submodule update committed to parent repository"; \
+	else \
+		echo "ℹ️  No submodule changes to commit"; \
+	fi
 
 # Force update (same as update-submodule for clarity)
 force-update: update-submodule
@@ -91,6 +104,59 @@ force-update: update-submodule
 # Update submodule and regenerate config files
 update: update-submodule config
 	@echo "✓ Update complete - submodule and config files are now current"
+
+# Push changes including submodule updates to remote
+push: 
+	@echo "🚀 Pushing changes to remote repository..."
+	@echo ""
+	@# Check if config directory exists and is a git repository
+	@if [ ! -d "config" ]; then \
+		echo "❌ Config directory not found. Make sure submodule is initialized."; \
+		echo "   Run: git submodule init && git submodule update"; \
+		exit 1; \
+	fi
+	@# Check if submodule is in detached HEAD state and fix it (but don't push config changes)
+	@if (cd config && git symbolic-ref -q HEAD >/dev/null 2>&1); then \
+		echo "✓ Config submodule is on a branch"; \
+	else \
+		echo "⚠️  Config submodule is in detached HEAD state, fixing..."; \
+		if (cd config && git checkout main 2>/dev/null); then \
+			echo "✓ Fixed submodule detached HEAD state (checkout main)"; \
+			git add config; \
+			if ! git diff --cached --quiet; then \
+				git commit -m "Fix config submodule detached HEAD state"; \
+				echo "✓ Committed submodule fix to parent repository"; \
+			fi; \
+		else \
+			echo "⚠️  Could not fix detached HEAD state (remote may not be configured)"; \
+		fi; \
+	fi
+	@echo ""
+	@# ONLY push the parent repository - NEVER push TO the config submodule
+	@echo "📤 Pushing PARENT repository changes only..."
+	@if git config --get remote.origin.url >/dev/null 2>&1; then \
+		if git status --porcelain | grep -q .; then \
+			echo "⚠️  You have uncommitted changes. Please commit them first."; \
+			git status --short; \
+			exit 1; \
+		fi; \
+		if git log --oneline origin/main..HEAD 2>/dev/null | grep -q .; then \
+			echo "📤 Pushing commits to parent repository remote..."; \
+			git push origin main; \
+			echo "✓ Parent repository changes pushed"; \
+		else \
+			echo "ℹ️  No new commits to push in parent repository"; \
+		fi; \
+	else \
+		echo "⚠️  No remote 'origin' configured for parent repository."; \
+		echo "   Configure remote with: git remote add origin <parent-repository-url>"; \
+		echo "   Current local changes are committed but not pushed."; \
+	fi
+	@echo ""
+	@echo "⚠️  NOTE: This command only pushes the PARENT repository."
+	@echo "   Config submodule changes should be proposed via 'make propose-changes'"
+	@echo ""
+	@echo "✅ Push complete"
 
 # Check what configuration changes have been made locally
 check-changes:
