@@ -63,4 +63,4 @@ You can specify custom output paths and types as needed.
 Whenever the upstream config or secrets change, repeat steps 1–3 to pull the latest and regenerate your local files.
 
 ---
-For more details, see the comments in `lab-config.yml` and `scripts/export-config.py`.
+For more details, see the comments in `lab-config.yml` and `scripts/subscriber/export-config.py`.
