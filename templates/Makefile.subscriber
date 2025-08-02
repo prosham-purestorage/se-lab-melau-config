@@ -1,7 +1,7 @@
 # Makefile for Subscriber Repository
 # Copy this file to your repository root as 'Makefile' after adding se-lab-melau-config as a submodule
 
-.PHONY: config install clean help update-submodule update
+.PHONY: config install clean help update-submodule update show-diff reset-config stash-update
 
 # Default target - show help
 help:
@@ -12,6 +12,11 @@ help:
 	@echo "  clean           - Remove generated configuration files"
 	@echo "  update-submodule - Update config submodule to latest version"
 	@echo ""
+	@echo "Conflict resolution targets:"
+	@echo "  show-diff       - Show local changes that conflict with remote"
+	@echo "  reset-config    - Discard local changes and update (DESTRUCTIVE)"
+	@echo "  stash-update    - Stash local changes, update, then restore"
+	@echo ""
 	@echo "Prerequisites:"
 	@echo "  1. Add se-lab-melau-config as a git submodule:"
 	@echo "     git submodule add <repo-url> config"
@@ -21,6 +26,12 @@ help:
 	@echo "  make install  # Run once to set up environment"
 	@echo "  make config   # Generate config files"
 	@echo "  make update   # Get latest config changes and regenerate files"
+	@echo ""
+	@echo "Workflow for getting latest changes:"
+	@echo "  make update   # This will:"
+	@echo "                #   1. Pull latest config submodule changes"
+	@echo "                #   2. Regenerate all config files"
+	@echo "                #   3. Apply secure permissions"
 
 # Install dependencies and set up virtual environment
 install:
@@ -51,8 +62,57 @@ clean:
 # Update submodule to latest version
 update-submodule:
 	@echo "Updating config submodule to latest version..."
-	git submodule update --remote config
-	@echo "✓ Submodule updated"
+	@echo "Checking for local changes in config submodule..."
+	@if [ -n "$$(cd config && git status --porcelain)" ]; then \
+		echo "⚠️  Warning: Local changes detected in config submodule:"; \
+		cd config && git status --short; \
+		echo ""; \
+		echo "Options to resolve:"; \
+		echo "  make reset-config     # Discard local changes and update"; \
+		echo "  make stash-update     # Stash changes, update, then restore"; \
+		echo "  make show-diff        # Show what changes would be lost"; \
+		echo ""; \
+		echo "❌ Update aborted to prevent data loss"; \
+		exit 1; \
+	else \
+		git submodule update --remote config; \
+		echo "✓ Submodule updated successfully"; \
+	fi
+
+# Show differences between local and remote config
+show-diff:
+	@echo "📋 Local changes that would be overwritten:"
+	@cd config && git diff HEAD
+
+# Reset config to match remote (DISCARDS local changes)
+reset-config:
+	@echo "⚠️  This will DISCARD all local changes in the config submodule!"
+	@read -p "Are you sure? (y/N): " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		cd config && git reset --hard HEAD && git clean -fd; \
+		git submodule update --remote config; \
+		echo "✓ Config reset and updated to latest version"; \
+	else \
+		echo "❌ Reset cancelled"; \
+	fi
+
+# Stash local changes, update, then restore
+stash-update:
+	@echo "💾 Stashing local changes..."
+	@cd config && git stash push -m "Auto-stash before submodule update $$(date)"
+	@echo "🔄 Updating submodule..."
+	@git submodule update --remote config
+	@echo "📥 Attempting to restore stashed changes..."
+	@if cd config && git stash pop; then \
+		echo "✓ Update complete with local changes restored"; \
+		echo "⚠️  Please review for any merge conflicts"; \
+	else \
+		echo "⚠️  Conflicts detected when restoring changes"; \
+		echo "Your changes are safe in the stash. Use these commands:"; \
+		echo "  cd config && git stash list"; \
+		echo "  cd config && git stash show"; \
+		echo "  cd config && git stash drop  # to discard stashed changes"; \
+	fi
 
 # Update submodule and regenerate config files
 update: update-submodule config
