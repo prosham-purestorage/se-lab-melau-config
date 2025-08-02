@@ -1,6 +1,6 @@
 # Makefile for SE Lab Melbourne Config Repo
 
-.PHONY: tests test-decrypt test-export test-subscriber clean export commit push status help
+.PHONY: tests test-decrypt test-export test-subscriber clean export commit push status help test-pr
 
 # Default target - show help
 help:
@@ -9,6 +9,7 @@ help:
 	@echo "  test-decrypt    - Test secrets decryption"
 	@echo "  test-export     - Test configuration export to all formats"
 	@echo "  test-subscriber - Test subscriber workflow simulation"
+	@echo "  test-pr         - Test Pull Request workflow for config changes"
 	@echo "  export          - Generate all configuration files"
 	@echo "  clean           - Remove generated export files"
 	@echo "  status          - Show git status and recent commits"
@@ -20,7 +21,7 @@ help:
 	@echo "  make push       # Full workflow: export + commit + push"
 
 # Run all tests
-tests: test-decrypt test-export test-subscriber
+tests: test-decrypt test-export test-subscriber test-pr
 
 # Default target
 all: help
@@ -41,6 +42,10 @@ test-export:
 # Test subscriber workflows (simulates submodule usage)
 test-subscriber:
 	.venv/bin/python scripts/admin/test_subscriber_workflow.py
+
+# Test Pull Request workflow
+test-pr:
+	.venv/bin/python scripts/admin/test_pr_workflow.py
 
 # Clean export files
 clean:

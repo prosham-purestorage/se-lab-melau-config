@@ -1,7 +1,7 @@
 # Makefile for Subscriber Repository
 # Copy this file to your repository root as 'Makefile' after adding se-lab-melau-config as a submodule
 
-.PHONY: config install clean help update-submodule update force-update
+.PHONY: config install clean help update-submodule update force-update propose-changes check-changes
 
 # Default target - show help
 help:
@@ -13,9 +13,13 @@ help:
 	@echo "  update-submodule - Update config submodule (DISCARDS local changes)"
 	@echo "  force-update    - Alias for update-submodule"
 	@echo ""
+	@echo "Configuration Change Workflow:"
+	@echo "  check-changes   - Show what config changes you've made locally"
+	@echo "  propose-changes - Create a Pull Request with your config changes"
+	@echo ""
 	@echo "⚠️  IMPORTANT: The shared config is AUTHORITATIVE"
 	@echo "   Local changes to config/ files will be DISCARDED on update"
-	@echo "   All configuration changes must be made in the main config repo"
+	@echo "   Use 'propose-changes' to submit changes for review"
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  1. Add se-lab-melau-config as a git submodule:"
@@ -34,7 +38,14 @@ help:
 	@echo "                #   3. Regenerate all config files"
 	@echo "                #   4. Apply secure permissions"
 	@echo ""
-	@echo "Note: Never edit files in config/ - they will be overwritten!"
+	@echo "Workflow for proposing config changes:"
+	@echo "  1. Edit config files (lab-config.yml, etc.)"
+	@echo "  2. make check-changes    # Review your changes"
+	@echo "  3. make propose-changes  # Create a Pull Request"
+	@echo "  4. Wait for admin approval and merge"
+	@echo "  5. make update           # Get approved changes back"
+	@echo ""
+	@echo "Note: Never edit files in config/ unless proposing changes!"
 
 # Install dependencies and set up virtual environment
 install:
@@ -80,3 +91,61 @@ force-update: update-submodule
 # Update submodule and regenerate config files
 update: update-submodule config
 	@echo "✓ Update complete - submodule and config files are now current"
+
+# Check what configuration changes have been made locally
+check-changes:
+	@echo "📋 Checking for local configuration changes..."
+	@if [ -n "$$(cd config && git status --porcelain)" ]; then \
+		echo "📝 Local changes detected:"; \
+		echo ""; \
+		cd config && git status --short; \
+		echo ""; \
+		echo "📊 Detailed differences:"; \
+		cd config && git diff HEAD; \
+		echo ""; \
+		echo "💡 To propose these changes: make propose-changes"; \
+	else \
+		echo "✅ No local changes detected"; \
+		echo "💡 Make your changes to config files, then run 'make check-changes'"; \
+	fi
+
+# Propose configuration changes via Pull Request
+propose-changes:
+	@echo "🚀 Proposing Configuration Changes"
+	@echo "=================================="
+	@echo ""
+	@# Check if there are changes to propose
+	@if [ -z "$$(cd config && git status --porcelain)" ]; then \
+		echo "❌ No local changes detected to propose"; \
+		echo "💡 Make changes to config files first, then run this command"; \
+		exit 1; \
+	fi
+	@echo "📝 Local changes detected:"
+	@cd config && git status --short
+	@echo ""
+	@# Get information for the PR
+	@read -p "📋 Enter a title for your config changes: " title; \
+	read -p "📄 Enter a description of your changes: " description; \
+	subscriber_name=$$(basename $$(pwd)); \
+	branch_name="config-update-$$subscriber_name-$$(date +%Y%m%d-%H%M%S)"; \
+	echo ""; \
+	echo "🔧 Creating branch: $$branch_name"; \
+	cd config && git checkout -b "$$branch_name"; \
+	echo ""; \
+	echo "💾 Committing changes..."; \
+	cd config && git add .; \
+	cd config && git commit -m "Config update from $$subscriber_name: $$title" -m "$$description" -m "Proposed by: $$subscriber_name repository" -m "Timestamp: $$(date)"; \
+	echo ""; \
+	echo "🚀 Pushing branch to remote..."; \
+	cd config && git push origin "$$branch_name"; \
+	echo ""; \
+	echo "✅ Configuration changes proposed successfully!"; \
+	echo ""; \
+	echo "📋 Next steps:"; \
+	echo "  1. Go to the config repository on GitHub"; \
+	echo "  2. You should see a prompt to create a Pull Request"; \
+	echo "  3. Or manually create a PR from branch: $$branch_name"; \
+	echo "  4. Once approved and merged, run 'make update' to get the changes back"; \
+	echo ""; \
+	echo "🔄 Returning to main branch..."; \
+	cd config && git checkout main
